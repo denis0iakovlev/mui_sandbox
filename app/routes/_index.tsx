@@ -35,6 +35,11 @@ export default function Index() {
             Remix Docs
           </a>
         </li>
+        <li>
+          <a target="_blank" href="/admin" rel="noreferrer">
+            Test Site
+          </a>
+        </li>
       </ul>
     </div>
   );

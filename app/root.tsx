@@ -1,3 +1,4 @@
+import { ThemeProvider, createTheme } from "@mui/material";
 import { cssBundleHref } from "@remix-run/css-bundle";
 import type { LinksFunction } from "@remix-run/node";
 import {
@@ -8,11 +9,20 @@ import {
   Scripts,
   ScrollRestoration,
 } from "@remix-run/react";
+import styles from "~/styles/styles.css"
 
 export const links: LinksFunction = () => [
-  ...(cssBundleHref ? [{ rel: "stylesheet", href: cssBundleHref }] : []),
+  { rel: "stylesheet", href: styles }
 ];
-
+const theme = createTheme({
+  components: {
+    MuiTextField: {
+      defaultProps: {
+        sx: { m: 1 }
+      }
+    }
+  }
+});
 export default function App() {
   return (
     <html lang="en">
