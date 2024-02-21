@@ -1,5 +1,5 @@
 import { TableBodyClassKey } from "@mui/material";
-import { Brand, Item, ProductCategory, ProductModel, Sex, TableOfSizes } from "@prisma/client";
+import { Brand, Item, ProductCategory, ProductModel, Sex, TableOfSizes, Surface } from "@prisma/client/edge";
 import { db } from "~/utils/db.serves"
 /**
  * Its function and types used admin page 
@@ -15,11 +15,10 @@ export interface ProductModelData extends ProductModel {
     brendName?: string;
     items?: string;
 }
-type MoveBrandData = Omit<Brand, "id">;
 //
-export type TablesTypes = "brands" | "categories" | "models" | "item" | "sex" | "tableOfSize";
+export type TablesTypes = "brands" | "categories" | "models" | "item" | "sex" | "tableOfSize" | "surface";
 //
-export type UnionOfTables = Brand | ProductCategory | ProductModel | Item | Sex | TableOfSizes;
+export type UnionOfTables = Brand | ProductCategory | ProductModel | Item | Sex | TableOfSizes | Surface;
 /**
  * 
  * @returns возвращает все бренды с отношением к категории товаров
@@ -59,7 +58,7 @@ export async function getAllCategories(): Promise<Categories[]> {
          Получить все прдставленные модели товаров 
 */
 export async function getAllProductModels(): Promise<ProductModelData[]> {
-    const dbRecords = await db.productModel.findMany({ include: { category: true, brend: true, modelItems: true } });
+    const dbRecords = await db.productModel.findMany({ include: { category: true, brend: true, modelItems: true , surface:true} });
     let result: ProductModelData[] = [];
     for (let record of dbRecords) {
         let add: ProductModelData = {
@@ -95,8 +94,10 @@ export async function createEmptyDbRecord(typeTable: TablesTypes): Promise<Union
             return await db.sex.create({});
         case "tableOfSize":
             return await db.tableOfSizes.create({});
+        case "surface":
+            return await db.surface.create({data:{surfaceName:""}});
         default:
-            throw Error( "Not implemented for " + typeTable + " type table");
+            throw Error("Not implemented for " + typeTable + " type table");
     }
 }
 /*
@@ -121,6 +122,9 @@ export async function deleteRecordOnId(typeTable: TablesTypes, id: number): Prom
             await db.sex.delete({ where: { id: id } });
             break;
         case "tableOfSize":
+            await db.tableOfSizes.delete({ where: { id: id } });
+            break;
+        case "surface":
             await db.tableOfSizes.delete({ where: { id: id } });
             break;
     }
@@ -152,8 +156,11 @@ export async function getRecord(typeTable: TablesTypes, id: number): Promise<Uni
         case "tableOfSize":
             res = await db.tableOfSizes.findUnique(whereData);
             break;
+        case "surface":
+            res = await db.surface.findUnique(whereData);
+            break;
     }
-    if(!res){
+    if (!res) {
         throw Error(`id ${id} not valid for table ${typeTable}`);
     }
     return res;
@@ -161,28 +168,30 @@ export async function getRecord(typeTable: TablesTypes, id: number): Promise<Uni
 /*
 Create new record and copy data from source
 */
-export async function createAndCopyFrom(typeTable: TablesTypes, sourceId: number) {
+export async function createAndCopyFrom(typeTable: TablesTypes, sourceId: number): Promise<number> {
     const sourceRecord = await getRecord(typeTable, sourceId);
     //
+    let newRecord :any = null;
     switch (typeTable) {
         case "brands":
             const srcRec = sourceRecord as Brand;
-            const {id:_, ...src} = srcRec;
+            const { id: _, ...src } = srcRec;
             console.log(src);
-            await db.brand.create({
-                data:{
+            newRecord = await db.brand.create({
+                data: {
                     ...src
                 }
-            });            
+            });
             break;
-            case "item":
-                const srcItem = sourceRecord as Item;
-                const { ...data }: Partial <Omit<Item, "id"|"modelId"|"sexId">>  = srcItem;
-                delete data["id"];
-                await db.item.create({
-                    data
-                });
+        case "item":
+            const srcItem = sourceRecord as Item;
+            const { ...data }: Partial<Omit<Item, "id" >> = srcItem;
+            delete data["id"];
+            newRecord = await db.item.create({
+                data
+            });
         default:
             throw Error("Its table not support copy from button");
     }
+    return newRecord.id;
 }

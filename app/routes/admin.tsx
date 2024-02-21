@@ -2,13 +2,10 @@ import { ActionFunctionArgs, json, redirect } from "@remix-run/node";
 import { useLoaderData, Outlet, Link, Form, useActionData } from "@remix-run/react";
 import { GridCallbackDetails, GridColDef, GridRowSelectionModel, } from "@mui/x-data-grid";
 import { Box, Button, Divider, Typography } from "@mui/material";
-
-import { useState } from "react";
 import TableComponent, { ActionVariant } from "~/components/TableComponent"
 import invariant from "tiny-invariant";
-import { BrandData, getAllCategories, TablesTypes, createEmptyDbRecord, deleteRecordOnId, getBrandList, getAllProductModels, getAllItems, createAndCopyFrom } from "~/utils/db.adminPage.utils";
+import {  getAllCategories, TablesTypes, createEmptyDbRecord, deleteRecordOnId, getBrandList, getAllProductModels, getAllItems, createAndCopyFrom } from "~/utils/db.adminPage.utils";
 import { db } from "~/utils/db.serves";
-import { Item } from "@prisma/client";
 
 type ErrorAction = {
     table: string,
@@ -21,12 +18,13 @@ export const loader = async () => {
     const categories = await getAllCategories();
     const models = await getAllProductModels();
     const items = await getAllItems();
+    const surfaces = await db.surface.findMany({});
     //Get all table of sex records
     const sex_list = await db.sex.findMany({});
     //Get all tables of sizing
     const tableOfSizeList = await db.tableOfSizes.findMany({ include: { sex: true } });
     //отправить в виде ответа в визуальную часть 
-    return json({ brandData, categories, models, items, sex_list, tableOfSizeList });
+    return json({ brandData, categories, models, items, sex_list, tableOfSizeList, surfaces });
 }
 export const action = async ({ request }: ActionFunctionArgs) => {
     const formData = await request.formData();
@@ -45,7 +43,7 @@ export const action = async ({ request }: ActionFunctionArgs) => {
             case "new":
                 const newDbRecord = await createEmptyDbRecord(typeTable);
                 return redirect(`/${typeTable}/${newDbRecord.id}/edit`);
-                break;
+               
             case "delete":
                 const delete_list_id = (actionData.to_delete_list as string).split(',');
                 for (const id of delete_list_id) {
@@ -55,8 +53,8 @@ export const action = async ({ request }: ActionFunctionArgs) => {
                 break;
             case "copy_from":
                 const sourceId = +actionData.copy_from;
-                await createAndCopyFrom(typeTable, sourceId);
-                break;
+                const newRecord =  await createAndCopyFrom(typeTable, sourceId);
+                return redirect(`/${typeTable}/${newRecord}/edit`);
         }
     } catch (e) {
         const error = e as Error;
@@ -69,7 +67,7 @@ export const action = async ({ request }: ActionFunctionArgs) => {
     return json({ errorAction });
 }
 export default function AdminPanel() {
-    const { brandData, categories, models, items, sex_list, tableOfSizeList } = useLoaderData<typeof loader>();
+    const { brandData, categories, models, items, sex_list, tableOfSizeList, surfaces } = useLoaderData<typeof loader>();
     const data = useActionData<typeof action>();
     //Сохраняем сюда данный
     return (
@@ -124,6 +122,12 @@ export default function AdminPanel() {
                 rows={tableOfSizeList}
                 columns={columnsOfTableSizes}
             />
+            <TableComponent
+                type="surface"
+                title="Специализация"
+                rows={surfaces}
+                columns={columnOfSurface}
+            />
         </Box >
     );
 }
@@ -145,6 +149,13 @@ const columnsOfModels: GridColDef[] = [
     { field: 'description', headerName: "Описание" },
     { field: 'categoryName', headerName: "Категория", width: 150, },
     { field: 'brendName', headerName: "Бренд", align: "center", headerAlign: "center" },
+    { field: 'surface', headerName: "Специализация", align: "center", headerAlign: "center", valueGetter: (params)=>{
+        if(params.row.surface){
+            return params.row.surface.surfaceName;
+        }else{
+            return "Не задано";
+        }
+    } },
 ]
 //колнки для моделей продукта
 const columnsOfItems: GridColDef[] = [
@@ -210,4 +221,8 @@ const columnsOfTableSizes: GridColDef[] = [
             return 'Пол не указан';
         },
     },
+]
+const columnOfSurface:GridColDef[] = [
+    { field: 'id', headerName: "Id", width: 60, type: "number" },
+    { field: 'surfaceName', headerName: "Для какого покрытия", width: 200, type: "string" },
 ]

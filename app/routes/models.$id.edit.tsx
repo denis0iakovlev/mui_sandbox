@@ -13,7 +13,7 @@ import { PopEntity, PopListSettings } from "~/components/PopListComponent";
 
 //use for handling input text change event
 type ModelChangeType = Omit<ProductModel, "modelImg">;
-type TextFieldChangeType = Exclude<keyof ModelChangeType, "categoryId" | "brandId" | "id">;
+type TextFieldChangeType = Exclude<keyof ModelChangeType, "categoryId" | "brandId" | "id" | "surfaceId">;
 type RelationChangeType = Exclude<keyof ModelChangeType, TextFieldChangeType | "id">;
 
 export const loader = async ({ params }: LoaderFunctionArgs) => {
@@ -22,14 +22,15 @@ export const loader = async ({ params }: LoaderFunctionArgs) => {
         where: { id: +params.id }, include: {
             category: true,
             brend: true,
+            surface:true,
         }
     });
     invariant(model, "Not found model of product on id " + params.id);
     //Так как модель хранит в себе ссылки на бренд и на категорию , то нужно получить все бренды и все категории что бы отобразить в расскрывающихся списках
     const brands = await db.brand.findMany();
     const categories = await db.productCategory.findMany();
-    const sexList = await db.sex.findMany();
-    return json({ model, brands, categories, sexList });
+    const surfaces = await db.surface.findMany();
+    return json({ model, brands, categories , surfaces});
 }
 export const action = async ({ params, request }: ActionFunctionArgs) => {
     invariant(params.id, "");
@@ -63,11 +64,13 @@ export const action = async ({ params, request }: ActionFunctionArgs) => {
 }
 
 export default function ModelEdit() {
-    const { model, brands, categories, sexList } = useLoaderData<typeof loader>();
+    const { model, brands, categories, surfaces } = useLoaderData<typeof loader>();
     const [modelImg, SetModelImage] = useState<string | null>(model.modelImg);//use for select image model
     const [updateData, SetUpdateData] = useState<ModelChangeType & { category: ProductCategory | null }>(model);
     const [category, SetCategory] = useState<string | undefined>(model.category ? model.category.categoryName : undefined);
     const [brend, SetBrand] = useState<string | undefined>(model.brend ? model.brend.brandName : undefined);
+    //surface
+    const [surface, SetSurface] = useState<string>(model.surface ? model.surface.surfaceName :"");
     const navigate = useNavigate();
     const submit = useSubmit();
     //Бренд
@@ -108,6 +111,14 @@ export default function ModelEdit() {
                     throw "Wrong name of category";
                 }
                 break;
+                case "surfaceId":
+                    const surf = surfaces.find((s) => s.surfaceName === value);
+                    if(surf){
+                        updateData.surfaceId = surf.id;
+                        SetSurface(surf.surfaceName);
+                    }
+                    break;
+
         }
         SetUpdateData(updateData);
     }
@@ -168,6 +179,14 @@ export default function ModelEdit() {
                     outlineLabel="Категория товара"
                     sx={{ m: 1 }}
                     handlerSelect={(e: SelectChangeEvent<string>) => selectChangeHandler("categoryId", e)}
+                />
+                <PopListComponent
+                    popEntityList={surfaces.map((s)=>({key:s.id, value:s.surfaceName}))}
+                    value={surface}
+                    popListData={{ name: "surface", id: "id_surface", label_id: "label-surface" }}
+                    outlineLabel="Специализация"
+                    sx={{ m: 1 }}
+                    handlerSelect={(e: SelectChangeEvent<string>) => selectChangeHandler("surfaceId", e)}
                 />
                 <Box mx={1}>
                     <Button component="label" variant="outlined" sx={{

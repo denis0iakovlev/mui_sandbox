@@ -25,6 +25,9 @@ export const action = async ({ params, request }: ActionFunctionArgs) => {
             categoryId:{
                 set:+upData.categoryId
             },
+            surfaceId:{
+                set:+upData.surfaceId
+            }
         },
     })
     return json({200:"all ok"});
