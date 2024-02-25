@@ -6,7 +6,7 @@ import { ActionFunctionArgs, LinksFunction, LoaderFunctionArgs, MetaFunction, No
 import { Form, useLoaderData, useNavigate, useSubmit } from "@remix-run/react";
 import { ChangeEvent, ChangeEventHandler, useState } from "react";
 import invariant from "tiny-invariant"
-import { ItemImageList } from "~/components/ItemImageList";
+import { ImageList } from "~/components/ImageList";
 import PopListComponent, { PopEntity } from "~/components/PopListComponent";
 import { db } from "~/utils/db.serves";
 import path from "path"
@@ -61,9 +61,11 @@ export const action = async ({ params, request }: ActionFunctionArgs) => {
         const dbImages = updataItem.images.split(';');
         for (let image of dbImages) {
             const baseName = path.basename(image, path.extname(image));
-            const reg = /_([0-9]+)/;
+            const reg = /_([0-9]+)(-[0-9]+)*/;
             const match = baseName.match(reg);
-            if (match) {
+            const fullName = `${process.cwd()}/public/${image}`;
+            const stat = fs.existsSync(fullName);
+            if (match && stat ) {
                 const index_to_replace = +match[1];
                 imageList.splice(index_to_replace, 1, image);
             }
@@ -85,7 +87,8 @@ export const action = async ({ params, request }: ActionFunctionArgs) => {
             const fileNode = file as NodeOnDiskFile;
             //Get old name of file 
             const oldFileName = `${process.cwd()}/public/${imageList[i]}`;
-            if (imageList[i] && fs.existsSync(oldFileName)) {
+            const stat = fs.existsSync(oldFileName);
+            if (imageList[i] && stat ) {
                 //echange extensions
                 const extNew = path.extname(fileNode.name);
                 fs.rmSync(oldFileName);
@@ -265,7 +268,7 @@ export default function ItemEdit() {
             </Form>
             <Form method="post" encType="multipart/form-data">
                 <Box sx={{ my: 2, mx: 1 }}>
-                    <ItemImageList images={imageList} />
+                    <ImageList images={imageList} />
                 </Box>
                 <Box m={1} id="button-box">
                     <Button type="submit" sx={{ mx: 1 }} variant="contained" onClick={handlerSubmitClick}>Сохранить</Button>

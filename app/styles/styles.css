@@ -1,7 +1,21 @@
-img{
+img {
    object-fit: contain;
    object-position: center;
    height: 100%;
    width: 100%;
    margin-left: 5px;
+}
+
+.img-index {
+   padding: 10%;
+   object-fit: contain;
+   width: 80%;
+}
+
+link:hover {
+   background-color: rgb(73, 55, 28);
+}
+.image-list{
+  display: flex;
+  flex-direction: row;
 }
