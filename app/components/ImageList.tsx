@@ -2,7 +2,7 @@ import { Add } from "@mui/icons-material";
 import { Box, Button, ButtonGroup, IconButton, styled } from "@mui/material";
 import { NodeOnDiskFile } from "@remix-run/node";
 import React, { useState } from "react";
-
+import Image from "public/images/modelItem/1/img_file_2.jpg";
 
 export function ImageList({ images }: { images: string[] }) {
     const nullArr = Array(5 - images.length).fill(null);

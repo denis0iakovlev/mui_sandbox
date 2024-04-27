@@ -1,5 +1,5 @@
 import { GridColDef, GridRowSelectionModel, GridCallbackDetails, DataGrid } from "@mui/x-data-grid";
-import { Box, Typography, Button } from "@mui/material";
+import { Box, Typography, Button, Stack } from "@mui/material";
 import { Form } from "@remix-run/react";
 import { Link } from "react-router-dom";
 import { useState } from "react";
@@ -51,8 +51,8 @@ export default function TableComponent(
                 }}
             >
             </DataGrid>
-            <Box component="div"
-                sx={{ my: "10px", border: "1px solid" }} >
+            <Stack direction="row"
+                sx={{ my: "10px", borderBottom: "1px solid",display:"flex", p:1,  justifyContent:"end" }} >
                 <Form method="post" >
                     <input
                         type="text"
@@ -75,6 +75,7 @@ export default function TableComponent(
                                     type="submit"
                                     name="_action"
                                     value="new"
+                                    variant="contained"
                                 >
                                     New
                                 </Button>
@@ -109,7 +110,7 @@ export default function TableComponent(
                             )
                     }
                 </Form>
-            </Box>
+            </Stack>
         </Box>
     )
 }

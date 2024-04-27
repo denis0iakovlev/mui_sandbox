@@ -11,7 +11,6 @@ export const action = async ({ params, request }: ActionFunctionArgs) => {
     const upData = Object.fromEntries(data);
     invariant(typeof upData.name === "string", "Wrong input name" );
     invariant(typeof upData.description === "string", "Wrong input description");
-    const sexId = +upData.sexId;
     await db.productModel.update({
         where:{
             id:+params.id
@@ -19,6 +18,9 @@ export const action = async ({ params, request }: ActionFunctionArgs) => {
         data:{
             name:upData.name,
             description:upData.description,
+            color:upData.color as string,
+            price:+upData.price,
+            oldPrice:+upData.oldPrice,
             brandId:{
                 set:+upData.brandId
             },
@@ -27,6 +29,9 @@ export const action = async ({ params, request }: ActionFunctionArgs) => {
             },
             surfaceId:{
                 set:+upData.surfaceId
+            },
+            sexId:{
+                set:+upData.sexId,
             }
         },
     })

@@ -11,19 +11,20 @@ export type PopListSettings = {
     label_id: string
 }
 
-export default function PopListComponent({ popEntityList, popListData, value, outlineLabel, multiple, sx, handlerSelect }:
+export default function PopListComponent({ popEntityList, popListData, value, outlineLabel, multiple, sx, disabled, handlerSelect }:
     {
         popEntityList: PopEntity[],
         popListData: PopListSettings,
         value: string | undefined ,
         outlineLabel: string,
         multiple?: boolean,
+        disabled?:boolean,
         sx?: SxProps,
         handlerSelect?: (event: SelectChangeEvent<string>) => void
     }) {
         
     return (
-        <FormControl fullWidth sx={sx}>
+        <FormControl fullWidth sx={sx} disabled={disabled}>
             <InputLabel id={popListData.label_id}>{outlineLabel}</InputLabel>
             <Select
                 labelId={popListData.label_id}
@@ -40,6 +41,7 @@ export default function PopListComponent({ popEntityList, popListData, value, ou
                         <MenuItem
                             key={entity.key}
                             value={entity.value}
+                            id={entity.key}
                         >
                             {entity.value}
                         </MenuItem>

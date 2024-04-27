@@ -1,21 +1,44 @@
-img {
+.img-load {
    object-fit: contain;
    object-position: center;
    height: 100%;
    width: 100%;
-   margin-left: 5px;
 }
-
-.img-index {
-   padding: 10%;
+.image-main-card{
+   object-fit: cover;
+   width: 100%;
+   height: 100%;
+   display: block;
+}
+.image-small-card{
+  max-width: 100%;
+  max-height: 100%;
+align-self: center;
+}
+/* for sizing route*/
+.img-test{
    object-fit: contain;
-   width: 80%;
+   object-position: top;
+   max-width: 100%;
+   max-height:100%;
+   align-self: center;
 }
-
+a.without{
+   text-decoration: none;
+}
+a.without:visited{
+   color:inherit;
+}
 link:hover {
    background-color: rgb(73, 55, 28);
 }
-.image-list{
-  display: flex;
-  flex-direction: row;
+
+.MuiToolbar-root {
+   padding-left: 1px;
+   min-height: 30px;
+}
+/* for old price */
+.old-price-text{
+   text-decoration: line-through;
+   color: red;
 }

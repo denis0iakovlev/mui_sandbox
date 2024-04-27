@@ -103,13 +103,7 @@ export default function AdminPanel() {
                 title="Модель"
                 rows={models}
                 columns={columnsOfModels}
-            />
-            <TableComponent
-                type="item"
-                title="Позиции"
-                rows={items}
-                columns={columnsOfItems}
-            />
+            />           
             <TableComponent
                 type="sex"
                 title="Пол"
@@ -160,33 +154,6 @@ const columnsOfModels: GridColDef[] = [
 //колнки для моделей продукта
 const columnsOfItems: GridColDef[] = [
     { field: 'id', headerName: "Id", width: 60, type: "number" },
-    { field: 'quantity', headerName: "Кол-во", width: 60, type: "number" },
-    { field: 'color', headerName: "Цвет", width: 120 },
-    { field: 'price', headerName: "Цена", width: 100, },
-    { field: 'oldPrice', headerName: "Старая цена", width: 100, },
-    {
-        field: "modelId", headerName: "Id модели", width: 100, valueGetter: (params) => {
-            if (params.row['productModel']) {
-                return params.row['productModel']['name'];
-            } else {
-                return "Нет модели";
-            }
-        }
-    },
-    {
-        field: 'sexName', headerName: "Пол", valueGetter: (params) => {
-            if (Object.hasOwn(params.row, 'sex')) {
-                if (params.row['sex'] !== null) {
-                    if (Object.hasOwn(params.row['sex'], 'name')) {
-                        if (params.row['sex']['name']) {
-                            return params.row['sex']['name'];
-                        }
-                    }
-                }
-            }
-            return 'Пол не указан';
-        }
-    },
 ]
 //columns for show sex table
 const columnsOfSex: GridColDef[] = [

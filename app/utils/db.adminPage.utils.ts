@@ -76,7 +76,7 @@ export async function getAllProductModels(): Promise<ProductModelData[]> {
 Получитьвсе позиции товаров
  */
 export async function getAllItems() {
-    const dbItems = await db.item.findMany({ include: { productModel: true, sex: true } });
+    const dbItems = await db.item.findMany({ include: { productModel: true} });
     return dbItems;
 }
 //For action of create new empty record in db 
