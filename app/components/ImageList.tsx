@@ -41,7 +41,7 @@ function ImageIconButton({ image, num, handler }: { image?: string | null, num: 
             <Box component="div"sx={{ width: 50, height: 50 }}>
                 {
 
-                    image ? <img src={image} className=".img" onLoad={(e) => { URL.revokeObjectURL(e.target.src) }}></img>
+                    image ? <img src={image} className="img-load" onLoad={(e) => { URL.revokeObjectURL(e.target.src) }}></img>
                         : <Add sx={{height:50, width:20}} />
                 }
                 <VisualllyHiddenInput type="file" name={`img_file_${num}`} onChange={handler} />

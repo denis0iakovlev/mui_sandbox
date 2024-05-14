@@ -35,16 +35,6 @@ export default function RibbonImages({ inx, images, props }: {
                     hello
                 </Typography>
             </Box>
-            {/*
-                images.map((i, index) => (
-                    <Box
-                        component="div"
-                        key={index}
-                        onMouseOver={(e: React.MouseEvent<HTMLDivElement>) => onMouseHandler(index, e)}
-                        onMouseOut={onMouseOut}
-                        sx={{ p:2,height:"100%", border:"1px solid green", position: "absolute",left:`${400/
-                        */
-            }
         </Stack>
     )
 }

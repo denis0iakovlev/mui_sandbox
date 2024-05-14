@@ -58,7 +58,7 @@ export async function getAllCategories(): Promise<Categories[]> {
          Получить все прдставленные модели товаров 
 */
 export async function getAllProductModels(): Promise<ProductModelData[]> {
-    const dbRecords = await db.productModel.findMany({ include: { category: true, brend: true, modelItems: true , surface:true} });
+    const dbRecords = await db.productModel.findMany({ include: { category: true, brend: true, modelItems: true, surface: true, sex: true } });
     let result: ProductModelData[] = [];
     for (let record of dbRecords) {
         let add: ProductModelData = {
@@ -76,7 +76,7 @@ export async function getAllProductModels(): Promise<ProductModelData[]> {
 Получитьвсе позиции товаров
  */
 export async function getAllItems() {
-    const dbItems = await db.item.findMany({ include: { productModel: true} });
+    const dbItems = await db.item.findMany({ include: { productModel: true } });
     return dbItems;
 }
 //For action of create new empty record in db 
@@ -95,7 +95,7 @@ export async function createEmptyDbRecord(typeTable: TablesTypes): Promise<Union
         case "tableOfSize":
             return await db.tableOfSizes.create({});
         case "surface":
-            return await db.surface.create({data:{surfaceName:""}});
+            return await db.surface.create({ data: { surfaceName: "" } });
         default:
             throw Error("Not implemented for " + typeTable + " type table");
     }
@@ -171,11 +171,11 @@ Create new record and copy data from source
 export async function createAndCopyFrom(typeTable: TablesTypes, sourceId: number): Promise<number> {
     const sourceRecord = await getRecord(typeTable, sourceId);
     //
-    let newRecord :any = null;
+    let newRecord: any = null;
     switch (typeTable) {
         case "brands":
             const srcRec = sourceRecord as Brand;
-            const { id: _, ...src } = srcRec;
+            const { id:id, ...src } = srcRec;
             console.log(src);
             newRecord = await db.brand.create({
                 data: {
@@ -183,10 +183,17 @@ export async function createAndCopyFrom(typeTable: TablesTypes, sourceId: number
                 }
             });
             break;
+        case "models":
+            const {id:_, modelImg, ...dataMod} = sourceRecord as ProductModel;
+            newRecord = await db.productModel.create({
+                data:{
+                    ...dataMod
+                }
+            });
+            break;
         case "item":
             const srcItem = sourceRecord as Item;
-            const { ...data }: Partial<Omit<Item, "id" >> = srcItem;
-            delete data["id"];
+            const { ...data }: Partial<Omit<Item, "id">> = srcItem;
             newRecord = await db.item.create({
                 data
             });

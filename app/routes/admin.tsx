@@ -1,11 +1,14 @@
 import { ActionFunctionArgs, json, redirect } from "@remix-run/node";
 import { useLoaderData, Outlet, Link, Form, useActionData } from "@remix-run/react";
 import { GridCallbackDetails, GridColDef, GridRowSelectionModel, } from "@mui/x-data-grid";
-import { Box, Button, Divider, Typography } from "@mui/material";
+import { Box, Button, Divider, IconButton, Snackbar, Typography } from "@mui/material";
 import TableComponent, { ActionVariant } from "~/components/TableComponent"
 import invariant from "tiny-invariant";
-import {  getAllCategories, TablesTypes, createEmptyDbRecord, deleteRecordOnId, getBrandList, getAllProductModels, getAllItems, createAndCopyFrom } from "~/utils/db.adminPage.utils";
+import { getAllCategories, TablesTypes, createEmptyDbRecord, deleteRecordOnId, getBrandList, getAllProductModels, getAllItems, createAndCopyFrom } from "~/utils/db.adminPage.utils";
 import { db } from "~/utils/db.serves";
+import { useEffect, useState } from "react";
+import { Close } from "@mui/icons-material";
+import { Item } from "@prisma/client";
 
 type ErrorAction = {
     table: string,
@@ -43,7 +46,7 @@ export const action = async ({ request }: ActionFunctionArgs) => {
             case "new":
                 const newDbRecord = await createEmptyDbRecord(typeTable);
                 return redirect(`/${typeTable}/${newDbRecord.id}/edit`);
-               
+
             case "delete":
                 const delete_list_id = (actionData.to_delete_list as string).split(',');
                 for (const id of delete_list_id) {
@@ -53,22 +56,43 @@ export const action = async ({ request }: ActionFunctionArgs) => {
                 break;
             case "copy_from":
                 const sourceId = +actionData.copy_from;
-                const newRecord =  await createAndCopyFrom(typeTable, sourceId);
+                const newRecord = await createAndCopyFrom(typeTable, sourceId);
                 return redirect(`/${typeTable}/${newRecord}/edit`);
         }
     } catch (e) {
         const error = e as Error;
-        if(error){
+        if (error) {
             errorAction = { table: typeTable, message: e.message }
-        }else{
+        } else {
             errorAction = { table: typeTable, message: e as string }
         }
     }
     return json({ errorAction });
 }
+const snackBarAction = (
+    <>
+        <IconButton
+            size="small"
+
+        >
+            <Close fontSize="small" />
+        </IconButton>
+    </>
+);
 export default function AdminPanel() {
     const { brandData, categories, models, items, sex_list, tableOfSizeList, surfaces } = useLoaderData<typeof loader>();
     const data = useActionData<typeof action>();
+    useEffect(() => {
+        if (data?.errorAction?.message) {
+            SetOpen(true);
+        }
+    }, [data])
+    const [open, SetOpen] = useState(false);
+    const handleClick = (event: React.SyntheticEvent | Event, reason?: string) => {
+        if (reason === 'clickaway')
+            return;
+        SetOpen(false);
+    }
     //Сохраняем сюда данный
     return (
         <Box sx={{
@@ -76,12 +100,13 @@ export default function AdminPanel() {
             m: 1
         }}>
             {
-                data ? data.errorAction ?
-                    <Typography variant="h5" color="error">
-                        Ошибка в таблице {data.errorAction.table} <br />
-                        {data.errorAction.message}
-                    </Typography>
-                    : null
+                data?.errorAction?.message ?
+                    <Snackbar
+                        open={open}
+                        autoHideDuration={6000}
+                        message={data?.errorAction?.message}
+                        onClose={handleClick}
+                    />
                     : null
             }
             <TableComponent
@@ -103,7 +128,7 @@ export default function AdminPanel() {
                 title="Модель"
                 rows={models}
                 columns={columnsOfModels}
-            />           
+            />
             <TableComponent
                 type="sex"
                 title="Пол"
@@ -138,18 +163,58 @@ const columnsOfCategories: GridColDef[] = [
 ]
 //колнки для моделей продукта
 const columnsOfModels: GridColDef[] = [
-    { field: 'id', headerName: "Id", width: 60 },
-    { field: 'name', headerName: "Имя", width: 150 },
+    { field: 'id', headerName: "Id", width: 40 },
+    { field: 'designation', headerName: "Обозначение", width: 250 ,align: "left", headerAlign: "center",
+        valueGetter:(params)=>{
+            let design = "";
+            if(params.row.brendName){
+                design +=  params.row.brendName;
+            }
+            if(params.row.name){
+                design += " " + params.row.name;
+            }
+            return design;
+        }
+    },
+    { field: 'sizes', headerName: "Размеры",headerAlign:"center", width: 150,
+        valueGetter:(params)=>{
+            if(params.row.modelItems){
+                const itemsList = params.row.modelItems as Item[];
+                let sizes = "";
+                for(let i =0;i < itemsList.length; i++){
+                    if(i != itemsList.length-1){
+                        sizes += `${itemsList[i].size}, `;
+                    }else{
+                        sizes += itemsList[i].size;
+                    }
+                }
+                return sizes;
+            }else{
+                return "Нет позиций"
+            }
+        }
+     },
+    { field: 'color', headerName: "Цвет",headerAlign:"center", align:"center", width: 150 },
+    {
+        field: 'sexId', headerName: "Пол", width: 150,headerAlign:"center", align:"center",valueGetter: (params) => {
+            if (params.row.sex) {
+                return params.row.sex.name;
+            } else {
+                return "Пол не установлен"
+            }
+        }
+    },
+    {
+        field: 'surface', headerName: "Специализация", align: "center", headerAlign: "center", valueGetter: (params) => {
+            if (params.row.surface) {
+                return params.row.surface.surfaceName;
+            } else {
+                return "Не задано";
+            }
+        }
+    },
     { field: 'description', headerName: "Описание" },
     { field: 'categoryName', headerName: "Категория", width: 150, },
-    { field: 'brendName', headerName: "Бренд", align: "center", headerAlign: "center" },
-    { field: 'surface', headerName: "Специализация", align: "center", headerAlign: "center", valueGetter: (params)=>{
-        if(params.row.surface){
-            return params.row.surface.surfaceName;
-        }else{
-            return "Не задано";
-        }
-    } },
 ]
 //колнки для моделей продукта
 const columnsOfItems: GridColDef[] = [
@@ -189,7 +254,7 @@ const columnsOfTableSizes: GridColDef[] = [
         },
     },
 ]
-const columnOfSurface:GridColDef[] = [
+const columnOfSurface: GridColDef[] = [
     { field: 'id', headerName: "Id", width: 60, type: "number" },
     { field: 'surfaceName', headerName: "Для какого покрытия", width: 200, type: "string" },
 ]

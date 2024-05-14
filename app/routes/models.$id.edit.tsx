@@ -104,7 +104,7 @@ export const action = async ({ params, request }: ActionFunctionArgs) => {
             }
         });
     }
-    return redirect("/admin");
+    return json({});
 }
 
 export default function ModelEdit() {
@@ -323,10 +323,10 @@ export default function ModelEdit() {
                 </Box>
                 <Box m={1}>
                     <Button sx={{ marginRight: 1 }} variant="contained" type="submit" name="submiBtn" onClick={handlerClickSubmit}>
-                        Сохранить
+                        Сохранить изменения
                     </Button>
                     <Button onClick={() => { navigate("/admin") }} variant="outlined">
-                        Отменить
+                        Назад
                     </Button>
                 </Box>
             </Form>

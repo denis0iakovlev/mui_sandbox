@@ -1,77 +1,77 @@
 generator client {
-  provider = "prisma-client-js"
+    provider = "prisma-client-js"
 }
 
 datasource db {
-  provider = "sqlite"
-  url      = env("DATABASE_URL")
+    provider = "sqlite"
+    url      = env("DATABASE_URL")
 }
 
 model Brand {
-  id           Int               @id @default(autoincrement())
-  brandName    String
-  categories   ProductCategory[] @relation("BrandToProductCategory")
-  ProductModel ProductModel[]
+    id           Int               @id @default(autoincrement())
+    brandName    String
+    categories   ProductCategory[] @relation("BrandToProductCategory")
+    ProductModel ProductModel[]
 }
 
 //Table for description of what product is 
 //For example Shoe,Apparel, racqets and so on 
 model ProductCategory {
-  id            Int            @id @default(autoincrement())
-  categoryName  String
-  productModels ProductModel[]
-  brands        Brand[]        @relation("BrandToProductCategory")
+    id            Int            @id @default(autoincrement())
+    categoryName  String
+    productModels ProductModel[]
+    brands        Brand[]        @relation("BrandToProductCategory")
 }
 
 //This table describes product, product is certain model 
 //Its need for describe entaire product 
 model ProductModel {
-  id          Int              @id @default(autoincrement())
-  name        String
-  description String
-  categoryId  Int?
-  brandId     Int?
-  modelImg    String?
-  surfaceId   Int?
-  modelItems  Item[]
-  category    ProductCategory? @relation(fields: [categoryId], references: [id])
-  brend       Brand?           @relation(fields: [brandId], references: [id])
-  surface     Surface?         @relation(fields: [surfaceId], references: [id])
+    id          Int              @id @default(autoincrement())
+    name        String
+    description String
+    color       String?
+    price       Float?
+    oldPrice    Float?
+    categoryId  Int?
+    brandId     Int?
+    modelImg    String?
+    surfaceId   Int?
+    sexId       Int? // relation field to sex table
+    modelItems  Item[]
+    category    ProductCategory? @relation(fields: [categoryId], references: [id])
+    brend       Brand?           @relation(fields: [brandId], references: [id])
+    surface     Surface?         @relation(fields: [surfaceId], references: [id])
+    sex         Sex?             @relation(fields: [sexId], references: [id])
 }
 
 model TableOfSizes {
-  id       Int     @id @default(autoincrement())
-  sizes_us String?
-  sizes_uk String?
-  sizes_eu String?
-  sizes_cm String?
-  sexId    Int?
-  sex      Sex?    @relation(fields: [sexId], references: [id])
+    id       Int     @id @default(autoincrement())
+    sizes_us String?
+    sizes_uk String?
+    sizes_eu String?
+    sizes_cm String?
+    sexId    Int?
+    sex      Sex?    @relation(fields: [sexId], references: [id])
 }
 
 model Sex {
-  id           Int            @id @default(autoincrement())
-  name         String?
-  TableOfSizes TableOfSizes[]
-  Items        Item[]
+    id           Int            @id @default(autoincrement())
+    name         String?
+    TableOfSizes TableOfSizes[]
+    ProductModel ProductModel[]
 }
 
 model Surface {
-  id           Int            @id @default(autoincrement())
-  surfaceName  String
-  ProductModel ProductModel[]
+    id           Int            @id @default(autoincrement())
+    surfaceName  String
+    ProductModel ProductModel[]
 }
 
 model Item {
-  id           Int           @id @default(autoincrement())
-  quantity     Int?
-  color        String?
-  price        Float?
-  oldPrice     Float?
-  images       String?
-  modelId      Int?
-  size         String?
-  productModel ProductModel? @relation(fields: [modelId], references: [id])
-  sexId        Int? // relation field to sex table
-  sex          Sex?          @relation(fields: [sexId], references: [id])
+    id           Int           @id @default(autoincrement())
+    quantity     Int?
+    images       String?
+    size         String?
+    modelId      Int? 
+    productModel ProductModel? @relation(fields: [modelId], references: [id])
 }

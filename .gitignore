@@ -7,3 +7,8 @@ node_modules
 **/*.jfif
 **/*.jpeg
 **/*.jpg
+13_05_issue.txt
+route_desc
+prisma/schema.prisma_2
+**/*.webp
+**/*.png
