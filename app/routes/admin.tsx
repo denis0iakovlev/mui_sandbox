@@ -69,16 +69,7 @@ export const action = async ({ request }: ActionFunctionArgs) => {
     }
     return json({ errorAction });
 }
-const snackBarAction = (
-    <>
-        <IconButton
-            size="small"
 
-        >
-            <Close fontSize="small" />
-        </IconButton>
-    </>
-);
 export default function AdminPanel() {
     const { brandData, categories, models, items, sex_list, tableOfSizeList, surfaces } = useLoaderData<typeof loader>();
     const data = useActionData<typeof action>();
