@@ -1,14 +1,7 @@
 node_modules
-
 /.cache
 /build
 /public/build
-.env
-**/*.jfif
-**/*.jpeg
-**/*.jpg
 13_05_issue.txt
 route_desc
 prisma/schema.prisma_2
-**/*.webp
-**/*.png

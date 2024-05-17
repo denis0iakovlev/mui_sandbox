@@ -20,29 +20,33 @@ export default function ItemCard({ itemModel }: { itemModel: ProductModel & { br
         itemImages.push(notFoundedImage);
     }
     return (
-        <Paper key={itemModel.id} elevation={7}>
-            <Link to={`${itemModel.id}`} className="without">
-                <Box >
-                    <img
-                        className="image-small-card"
-                        id={`image-list-id-${0}`}
-                        src={itemImages[0]} alt="tennis shoes"
-                    />
-                </Box>
-                <Divider sx={{ m: 1 }} />
-                <Box >
-                    <Typography variant="body1">
-                        {`${itemModel.brend?.brandName} ${itemModel.name}`}
+        <Paper key={itemModel.id} elevation={7} sx={{
+            width: "100%",
+        }}>
+            <Box sx={
+                {
+                    width: "100%",
+                }
+            }>
+                <img
+                    className="img-card"
+                    id={`image-list-id-${0}`}
+                    src={itemImages[0]} alt="tennis shoes"
+                />
+            </Box>
+            <Divider sx={{ m: 1 }} />
+            <Box >
+                <Typography variant="body1">
+                    {`${itemModel.brend?.brandName} ${itemModel.name}`}
+                </Typography>
+                <Typography variant="body2">
+                    Цена:
+                    <Typography component="span" variant="body2" color="error" sx={{ textDecoration: "line-through" }}>
+                        {itemModel.oldPrice}
                     </Typography>
-                    <Typography variant="body2">
-                        Цена:
-                        <Typography component="span" variant="body2" color="error" sx={{ textDecoration: "line-through" }}>
-                            {itemModel.oldPrice}
-                        </Typography>
-                        {` ${itemModel.price}`}
-                    </Typography>
-                </Box>
-            </Link>
+                    {` ${itemModel.price}`}
+                </Typography>
+            </Box>
         </Paper >
     )
 }
