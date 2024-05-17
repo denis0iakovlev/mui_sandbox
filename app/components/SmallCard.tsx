@@ -65,7 +65,7 @@ export function SmallCard(opt: SmallCardArgs) {
                     height: "100%",
                     zIndex: 0,
                 }}>
-                    <img src={imageList2[imgIndex]} alt="" className="img-small-card" />
+                    <img src={imageList2[imgIndex]} alt="" className="img-card" />
                 </Box>
 
             </Box>
