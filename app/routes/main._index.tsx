@@ -1,10 +1,9 @@
 import {  useMediaQuery, useTheme } from "@mui/material";
 import type {  MetaFunction } from "@remix-run/node";
 import {  json, useLoaderData } from "@remix-run/react";
-import { Unstable_Grid2 as Grid } from "@mui/material"
+import { Unstable_Grid2 as Grid, styled, Paper, PaperProps } from "@mui/material"
 import { db } from "~/utils/db.serves";
 import { SmallCard } from "~/components/SmallCard";
-import { GridItem } from "~/components/GridItem";
 
 export const meta: MetaFunction = () => {
   return [
@@ -28,7 +27,7 @@ export const loader = async () => {
 export default function Index() {
   const { products } = useLoaderData<typeof loader>();
   return (
-    <>
+    <Grid container spacing={2}>
       {
         products.map((product) => (
           <Grid xs={6} sm={6} md={4} lg={3} xl={2} >
@@ -38,6 +37,20 @@ export default function Index() {
           </Grid>
         ))
       }
-    </>
+    </Grid>
   )
 }
+
+export const GridItem = styled(Paper)<PaperProps>(({ theme }) => (
+  {
+      backgroundColor: theme.palette.mode === 'dark' ? '#1A2027' : '#fff',
+      ...theme.typography.body2,
+      padding: theme.spacing(1),
+      color: theme.palette.text.secondary,
+      height: 200,
+      maxWidth: 300,
+      margin: "0 auto",
+      elevation: 12,
+      boxShadow: theme.shadows[6],
+      overflow: "hidden"
+  }));

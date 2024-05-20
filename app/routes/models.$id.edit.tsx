@@ -207,6 +207,8 @@ export default function ModelEdit() {
                     label="Описание продукта"
                     variant="outlined"
                     required
+                    multiline
+                    maxRows={6}
                     sx={{
                         m: 1
                     }}
