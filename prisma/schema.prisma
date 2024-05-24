@@ -72,6 +72,34 @@ model Item {
     quantity     Int?
     images       String?
     size         String?
-    modelId      Int? 
+    modelId      Int?
     productModel ProductModel? @relation(fields: [modelId], references: [id])
+    Order        Order?        @relation(fields: [orderId], references: [id])
+    orderId      Int?
 }
+//
+// Part for order
+//
+model User {
+    id        Int     @id @default(autoincrement())
+    idTg      Int?
+    email     String?
+    firstName String?
+    lastName  String?
+    phoneNumber Int?
+    Order     Order[]
+}
+
+model Order {
+    id     Int    @id @default(autoincrement())
+    items  Item[]
+    usr    User   @relation(fields: [usrId], references: [id])
+    usrId Int
+    city  String? 
+    zipCode Int?
+    phoneNumber Int?
+    firstName String?
+    lastName String?
+}
+
+
