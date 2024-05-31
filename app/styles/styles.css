@@ -16,3 +16,10 @@ a:visited{
 .color{
    background-color: #52349d;
 }
+.img-load {
+   height: 100%;
+   width: 100%;
+   object-fit: contain;
+   object-position: center;
+
+}

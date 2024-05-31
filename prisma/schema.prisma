@@ -81,12 +81,11 @@ model Item {
 // Part for order
 //
 model User {
-    id        Int     @id @default(autoincrement())
-    idTg      Int?
-    email     String?
+    id        Int     @id  @default(autoincrement())
     firstName String?
-    lastName  String?
+    userName  String?
     phoneNumber Int?
+    isAdmin Boolean?
     Order     Order[]
 }
 
@@ -94,6 +93,8 @@ model Order {
     id     Int    @id @default(autoincrement())
     items  Item[]
     usr    User   @relation(fields: [usrId], references: [id])
+    status String
+    openedData  DateTime
     usrId Int
     city  String? 
     zipCode Int?
