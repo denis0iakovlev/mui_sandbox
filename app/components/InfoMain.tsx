@@ -4,7 +4,8 @@ import { Brand, Item, ProductModel, Surface } from "@prisma/client";
 import { useFetcher } from "@remix-run/react";
 import { useState } from "react";
 
-export default function InfoMain({ product }: { product: ProductModel & { brend: Brand, surface: Surface, modelItems: Item[] } }) {
+export default function InfoMain({ product }: { product: ProductModel & 
+    { brend: Brand, surface: Surface, modelItems: Item[] } }) {
     const [selectedItem, SetSelectedItem] = useState<Item[] >([]);
     const fetcher = useFetcher();
     const theme = useTheme();

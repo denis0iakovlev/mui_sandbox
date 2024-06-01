@@ -89,13 +89,23 @@ model User {
     Order     Order[]
 }
 
+
 model Order {
     id     Int    @id @default(autoincrement())
     items  Item[]
-    usr    User   @relation(fields: [usrId], references: [id])
+    usr    User?   @relation(fields: [usrId], references: [id])
     status String
     openedData  DateTime
-    usrId Int
+    usrId Int?
+    city  String? 
+    zipCode Int?
+    phoneNumber Int?
+    firstName String?
+    lastName String?
+}
+
+model Adress{
+     id     Int    @id @default(autoincrement())
     city  String? 
     zipCode Int?
     phoneNumber Int?

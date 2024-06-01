@@ -122,13 +122,14 @@ export default function MainPage() {
         images = [noImage];
     }
     return (
-        <Grid container spacing={1}>
-            <Grid xs={12} xl={4} xlOffset={2} sx={{ height: "400" }}>
+        <Grid container spacing={4}>
+            <Grid xs={12} sm={10} smOffset={1} xl={4} xlOffset={2} sx={{ height: "400px" }}>
                 {/* Image block */}
                 <ImageViewMain images={images} />
             </Grid>
             {/** description block */}
-            <Grid xs={12} xl={2} sx={{ height: "400" }}>
+            <Grid xs={12} sm={10} smOffset={1}
+             xl={2} sx={{ height: "400px" }}>
                 <InfoMain product={productModel} />
             </Grid>
         </Grid>
