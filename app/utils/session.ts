@@ -1,11 +1,12 @@
 import { createCookieSessionStorage, redirect } from "@remix-run/node";
-interface logDat {
-    id: string,
-    itemId: number[],
+export const KEY_COOKIE = "orderId";
+
+interface cookieData {
+    orderId: string,
 }
 const { commitSession, getSession, destroySession } = createCookieSessionStorage<logDat>({
     cookie: {
-        name: "user_data",
+        name: "order_data",
         path: "/",
         maxAge: 60 * 60 * 24 * 2,
         sameSite: "lax",
@@ -13,31 +14,22 @@ const { commitSession, getSession, destroySession } = createCookieSessionStorage
     }
 });
 
-export async function getUserId(reques: Request) {
+export async function getOrderId(reques: Request) {
     const session = await getSession(reques.headers.get("Cookie"));
-    if (!session.has("id")) {
+    if (!session.has(KEY_COOKIE)) {
         return null;
     }
-    return session.get("id");
+    return session.get(KEY_COOKIE);
 }
 
-export async function login(userId: string, redirectTo: string) {
+export async function setCookie(key: string, redirectTo: string) {
     const session = await getSession();
-    session.set("id", userId);
+    session.set(KEY_COOKIE, key);
     return redirect(redirectTo, {
         status: 302,
         headers: {
             "Set-Cookie": await commitSession(session),
         }
     })
-}
-
-export async function checkLogin(request: Request) {
-    const userId = await getUserId(request);
-    if (userId === null) {
-        return redirect("/tgAuth");
-    } else {
-        return redirect("/main");
-    }
 }
 

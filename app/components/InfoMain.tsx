@@ -4,28 +4,30 @@ import { Brand, Item, ProductModel, Surface } from "@prisma/client";
 import { useFetcher } from "@remix-run/react";
 import { useState } from "react";
 
-export default function InfoMain({ product }: { product: ProductModel & 
-    { brend: Brand, surface: Surface, modelItems: Item[] } }) {
-    const [selectedItem, SetSelectedItem] = useState<Item[] >([]);
+export default function InfoMain({ product }: {
+    product: ProductModel &
+    { brend: Brand, surface: Surface, modelItems: Item[] }
+}) {
+    const [selectedItem, SetSelectedItem] = useState<boolean[]>(Array(product.modelItems.length));
     const fetcher = useFetcher();
     const theme = useTheme();
     const handlerClickSize = (inx: number) => {
-        const selItem = product.modelItems[inx];
-        const inxFromSel = selectedItem.findIndex(item=>item.id === selItem.id);
-        const copy = selectedItem;
-        if (inxFromSel >= 0) {
-            console.log(`Remove index ${inxFromSel} ${selItem.id} size:${selectedItem.length}`);
-            copy.splice(inxFromSel, 1);
-            console.log(copy);
-        } else {
-            console.log(`Add ${selItem.id} size:${selectedItem.length}`);
-            copy.push(selItem);
-        }
+        const copy  = selectedItem.slice();
+        copy[inx] = !copy[inx];
         SetSelectedItem(copy);
+        //
         const element = document.getElementById("item-id-list") as HTMLInputElement;
-        if(element){
-            Array.from(copy, (item)=> item.id).join();
-            element.value = Array.from(copy, (item)=> item.id).join();
+        if (element) {
+            const val = [];
+            for(let i =0; i < copy.length; i++){
+                if(copy[i]){
+                    val.push(product.modelItems[i].id);
+                }
+            }
+            element.value = val.join();
+            console.log(element.value);
+        }else{
+            console.log("element fot id isniot found");
         }
     }
     return (
@@ -66,9 +68,9 @@ export default function InfoMain({ product }: { product: ProductModel &
                     }}>
                         {
                             product.modelItems.map((item, inx) => (
-                                <Button size="small"  name="size-btn" 
-                                variant={selectedItem.length !== 0 ? "contained" : "outlined"} 
-                                sx={{ marginRight: 1 }}
+                                <Button size="small" name="size-btn"
+                                    variant={selectedItem[inx] ? "contained" : "outlined"}
+                                    sx={{ marginRight: 1 }}
                                     onClick={() => handlerClickSize(inx)}
                                 >
                                     {`US ${item.size}`}

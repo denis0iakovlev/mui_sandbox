@@ -1,7 +1,6 @@
 import { User } from "@prisma/client";
 import { LoaderFunctionArgs } from "@remix-run/node";
 import { getUser } from "~/utils/db.user";
-import {  login } from "~/utils/session";
 
 interface TgUserData {
     id: number,
@@ -40,7 +39,5 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
 
     const tgData = GetTgDataFromReq(request);
     //Set cookie
-    let userData:User = {id: tgData.id, firstName:tgData.first_name,userName:tgData.username, isAdmin:false};
-    const user = await getUser(userData);
     return login(tgData.id.toString(), "/main");
 }

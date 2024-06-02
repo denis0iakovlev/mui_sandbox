@@ -10,7 +10,7 @@ import noImage from "public/assets/no_image.jpg";
 import ImageViewMain from "~/components/ImageViewMain";
 import InfoMain from "~/components/InfoMain";
 import { request } from "http";
-import { getUserId } from "~/utils/session";
+import { getOrderId, setCookie } from "~/utils/session";
 import { User, Order } from "@prisma/client";
 
 export const loader = async ({ params }: LoaderFunctionArgs) => {
@@ -25,94 +25,62 @@ export const loader = async ({ params }: LoaderFunctionArgs) => {
             surface: true,
         }
     });
+    //
     return json({ productModel });
 }
 
 export const action = async ({ params, request }: ActionFunctionArgs) => {
-    const form = await request.formData();
-    //Получить из луки user id 
-    let user: User & { Order: Order[] } | null = null;
-    const userId = await getUserId(request);
-    let userIsCreated: boolean = false;
-    if (userId === null) {
-        //create temporary user
-        user = await db.user.create({
-            data: {
-                Order: {
-                    create: [
-                        {
-                            status: "OPEN",
-                            openedData: new Date(),
-                        }
-                    ]
-                }
-            },
-            include: {
-                Order: true,
-            }
-        });
-        userIsCreated = true;
-    }
-    if (typeof userId !== "string") {
-        throw "wrong user id";
-    }
-    user = await db.user.findUnique({
-        where: {
-            id: +userId
-        },
-        include: {
-            Order: true,
-        }
-    });
-    invariant(user, "User not found");
-    //try get on user open order
-    let openOrder: Order | null = null;
-    if (Object.hasOwn(user, "Order")) {
-        const inx = user.Order.findIndex(o => o.status === "OPEN");
-        if (inx >= 0) {
-            openOrder = user.Order[inx];
-        } else {
-            openOrder = await db.order.create({
-                data: {
-                    status: "OPEN",
-                    openedData: new Date,
-                    usr: {
-                        connect: {
-                            id: user.id
-                        }
-                    }
-                }
-            })
-        }
-    }else {
-        openOrder = await db.order.create({
+    //Получить из луки user id
+    const orderId = await getOrderId(request);
+
+    let orderIsCreated = false;
+    let order = null;
+    if (orderId === null) {
+        orderIsCreated = true;
+        order = await db.order.create({
             data: {
                 status: "OPEN",
-                openedData: new Date,
-                usr: {
-                    connect: {
-                        id: user.id
-                    }
+                openedData: new Date(),
+            }, include:{
+                items:true,
+            }
+        });
+        invariant(order, "New order wasnt created" + orderId)
+    } else {
+        order = await db.order.findUnique({
+            where: {
+                id: +orderId
+            }, include:{
+                items:true,
+            }
+        });
+        invariant(order, "Not fount order with id " + orderId)
+    }
+    const form = await request.formData();
+    //
+    const inputVal =  form.get("items_id_list") as string;
+    if (typeof inputVal === "string"){
+
+        const itemList = inputVal.split(',');
+        let itemIdList:number[] = Array.from(itemList, (item) => (+item));
+        let oldItemListId = Array.from(order.items, (item) => (item.id));
+        const fullNewList = oldItemListId.concat(itemIdList);
+        let connectItems :{id:number}[] =  fullNewList.map((id)=> ({id:id}));
+        
+        order = await db.order.update({
+            where:{
+                id:order.id,
+            }, data:{
+                items:{
+                    set:connectItems
                 }
             }
         })
     }
-    //
-    const entries = Object.fromEntries(form);
-    const itemId = form.get("items_id_list") as string;
-    const itemIdStr = itemId.split(',');
-    const itemIdList:{id:number}[]=[];
-    itemIdStr.map((item)=> itemIdList.push({id:+item}));
-    return await db.order.update({
-        where:{
-            id: openOrder.id
-        },
-        data:{
-            items:{
-                set:itemIdList
-            }
-        }
-    })
+    if(orderIsCreated){
+        return await setCookie(order.id.toString(),"/main/"+params.id );
+    }
+    return json({order});
 }
 
 export default function MainPage() {
@@ -129,7 +97,7 @@ export default function MainPage() {
             </Grid>
             {/** description block */}
             <Grid xs={12} sm={10} smOffset={1}
-             xl={2} sx={{ height: "400px" }}>
+                xl={2} sx={{ height: "400px" }}>
                 <InfoMain product={productModel} />
             </Grid>
         </Grid>

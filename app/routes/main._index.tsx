@@ -4,7 +4,6 @@ import { json, redirect, useLoaderData, useSearchParams } from "@remix-run/react
 import { Unstable_Grid2 as Grid, styled, Paper, PaperProps } from "@mui/material"
 import { db } from "~/utils/db.serves";
 import { SmallCard } from "~/components/SmallCard";
-import { checkLogin } from "~/utils/session";
 
 export const meta: MetaFunction = () => {
   return [
