@@ -77,40 +77,51 @@ model Item {
     Order        Order?        @relation(fields: [orderId], references: [id])
     orderId      Int?
 }
+
 //
 // Part for order
 //
 model User {
-    id        Int     @id  @default(autoincrement())
-    firstName String?
-    userName  String?
+    id          Int      @id @default(autoincrement())
+    firstName   String?
+    userName    String?
     phoneNumber Int?
-    isAdmin Boolean?
-    Order     Order[]
+    isAdmin     Boolean?
+    Order       Order[]
+    adresses    Adress[]
 }
-
 
 model Order {
-    id     Int    @id @default(autoincrement())
-    items  Item[]
-    usr    User?   @relation(fields: [usrId], references: [id])
-    status String
-    openedData  DateTime
-    usrId Int?
-    city  String? 
-    zipCode Int?
-    phoneNumber Int?
-    firstName String?
-    lastName String?
+    id         Int      @id @default(autoincrement())
+    items      Item[]
+    usrId      Int?
+    usr        User?    @relation(fields: [usrId], references: [id])
+    status     String
+    openedData DateTime
+    adress     Adress?  @relation(fields: [adressId], references: [id])
+    adressId   Int?
+    promo      Promo?   @relation(fields: [promoId], references: [id])
+    promoId    Int?
 }
 
-model Adress{
-     id     Int    @id @default(autoincrement())
-    city  String? 
-    zipCode Int?
+model Adress {
+    id          Int     @id @default(autoincrement())
+    city        String?
+    zipCode     Int?
+    street      String?
+    flat        String?
     phoneNumber Int?
-    firstName String?
-    lastName String?
+    firstName   String?
+    lastName    String?
+    Order       Order[]
+    User        User?   @relation(fields: [userId], references: [id])
+    userId      Int?
 }
 
-
+model Promo {
+    id            Int      @id @default(autoincrement())
+    sizePromo     Int
+    namePromo     String
+    expire        DateTime
+    usingInOrders Order[]
+}

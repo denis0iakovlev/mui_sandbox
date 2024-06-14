@@ -1,6 +1,9 @@
 import { User } from "@prisma/client";
 import { LoaderFunctionArgs } from "@remix-run/node";
+import invariant from "tiny-invariant";
+import { db } from "~/utils/db.serves";
 import { getUser } from "~/utils/db.user";
+import { login } from "~/utils/session";
 
 interface TgUserData {
     id: number,
@@ -38,6 +41,24 @@ function GetTgDataFromReq(request: Request) {
 export const loader = async ({ request }: LoaderFunctionArgs) => {
 
     const tgData = GetTgDataFromReq(request);
-    //Set cookie
+    //
+    const user = await db.user.upsert({
+        where:{
+            id:tgData.id
+        },
+        update:{
+            firstName: tgData.first_name,
+            isAdmin:false,
+            userName:tgData.username
+        },
+        create:{
+            id:tgData.id,
+            firstName: tgData.first_name,
+            isAdmin:false,
+            userName:tgData.username
+        }
+    });
+    invariant(user, "Dont create user in db");
+    //
     return login(tgData.id.toString(), "/main");
 }

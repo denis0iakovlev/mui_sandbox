@@ -26,7 +26,6 @@ export const loader = async ({ request, params }: LoaderFunctionArgs) => {
 
 export default function Index() {
   const { products } = useLoaderData<typeof loader>();
-  const [searchParams, SetSearchParams] = useSearchParams();
   return (
     <>
       <Grid container spacing={2}>

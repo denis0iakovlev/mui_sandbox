@@ -1,6 +1,6 @@
 import { Box, Button, Divider, IconButton, List, ListItem, ListItemAvatar, ListItemText, Paper, TextField, Typography } from "@mui/material";
 import { ActionFunctionArgs, LoaderFunctionArgs, json } from "@remix-run/node";
-import { useFetcher, useLoaderData } from "@remix-run/react";
+import { useFetcher, useLoaderData, useNavigate, useParams } from "@remix-run/react";
 import invariant from "tiny-invariant";
 import { db } from "~/utils/db.serves";
 import { Unstable_Grid2 as Grid } from "@mui/material"
@@ -78,9 +78,8 @@ export default function OrderPage() {
             >
                 <fetcher.Form method="post">
                     <Paper sx={{
-                        display: "flex",
-                        flexDirection: "row",
-                        minHeight: "400px"
+                        minHeight: "400px",
+                        width:"100%"
                     }}>
                         {
                             order?.items.length > 0 ?
@@ -103,6 +102,8 @@ export default function OrderPage() {
 function OrderItemsView({ items }: {
     items: Array<Item & { productModel: ProductModel & { brend: Brand } }>
 }) {
+    const nav = useNavigate();
+    const param = useParams();
     const handlerDelete = (idItem: string) => {
         const element = document.getElementById("delete-item-id") as HTMLInputElement;
         if (element) {
@@ -114,10 +115,18 @@ function OrderItemsView({ items }: {
         summary += item.productModel?.price ?? 0;
     });
     return (
-        <>
+        <Box
+            sx={{
+                paddingInline:5,
+                display:"flex",
+                flexDirection:"column"
+            }}
+        >
             <List sx={{
-
-            }}>
+                width:"100%",
+                justifySelf:"center",
+            }
+            }>
                 {
                     items.map((item) => (
                         <ListItem
@@ -133,11 +142,8 @@ function OrderItemsView({ items }: {
                                 </IconButton>
                             }
                             sx={{
-                                height: "50px",
-                                maxHeight: "60px",
                                 width: '100%',
                                 display: "flex",
-
                             }}
                         >
                             <ListItemAvatar sx={{
@@ -152,7 +158,7 @@ function OrderItemsView({ items }: {
                                 }}>
                                     <Typography sx={{
                                         justifySelf: "start",
-                                        flex: "0.8"
+                                        flex:"1"
                                     }}>
                                         {` ${item.productModel?.brend?.brandName} ${item.productModel?.name} US ${item.size}`}
                                     </Typography>
@@ -185,9 +191,10 @@ function OrderItemsView({ items }: {
                 marginBlock: 2
             }}
                 variant="contained"
+                onClick={()=>{nav("/main/confirm/order/"+param.id)}}
             >
                 Оформить заказ
             </Button>
-        </>
+        </Box>
     )
 }
