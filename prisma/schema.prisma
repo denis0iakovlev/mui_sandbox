@@ -109,8 +109,7 @@ model Adress {
     city        String?
     zipCode     Int?
     street      String?
-    flat        String?
-    phoneNumber Int?
+    phoneNumber String
     firstName   String?
     lastName    String?
     Order       Order[]

@@ -8,10 +8,10 @@ import { Delete } from "@mui/icons-material";
 import { Brand, Item, ProductModel } from "@prisma/client";
 
 export const loader = async ({ params }: LoaderFunctionArgs) => {
-    invariant(params.id, "Missing id order");
+    invariant(params.orderId, "Missing id order");
     const order = await db.order.findUnique({
         where: {
-            id: +params.id
+            id: +params.orderId
         },
         include: {
             usr: true,
@@ -28,7 +28,6 @@ export const loader = async ({ params }: LoaderFunctionArgs) => {
     });
     return json({ order });
 }
-
 export const action = async ({ params, request }: ActionFunctionArgs) => {
     invariant(params.id, "Missing id order");
     const formData = await request.formData();
@@ -66,14 +65,13 @@ export const action = async ({ params, request }: ActionFunctionArgs) => {
     }
     return json({});
 }
-
 export default function OrderPage() {
     const { order } = useLoaderData<typeof loader>();
     const fetcher = useFetcher();
     return (
         <Grid container spacing={2}>
-            <Grid xs={10} xsOffset={1}
-                sm={8} smOffset={2}
+            <Grid xs={12}
+                sm={10} smOffset={1}
                 md={6} mdOffset={3}
             >
                 <fetcher.Form method="post">
@@ -117,7 +115,7 @@ function OrderItemsView({ items }: {
     return (
         <Box
             sx={{
-                paddingInline:5,
+                paddingInline:1,
                 display:"flex",
                 flexDirection:"column"
             }}

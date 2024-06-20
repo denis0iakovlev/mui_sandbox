@@ -15,7 +15,9 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
   currentOrder = await db.order.findUnique({
     where: {
       id: +order,
-    }, include: {
+      status:"OPEN",
+    }, 
+    include: {
       items: true,
     }
   })
@@ -24,11 +26,10 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
 
 export default function MainPage() {
   const { currentOrder } = useLoaderData<typeof loader>();
-  const theme = useTheme();
   const nav = useNavigate();
   const handlerBagClick = () => {
     if (currentOrder !== null) {
-      nav("order/" + currentOrder.id)
+      nav("basket/" + currentOrder.id)
     }
   }
   return (
@@ -37,7 +38,7 @@ export default function MainPage() {
       backgroundSize: "cover",
       backgroundRepeat: "no-repeat",
       backgroundOrigin: "border-box",
-      p: 2,
+      p: 0,
     }}>
       <Box sx={{
         height: "40px",
