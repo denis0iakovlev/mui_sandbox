@@ -1,35 +1,41 @@
-import { Box, Button, Divider, IconButton, List, ListItem, ListItemAvatar, ListItemText, Paper, TextField, Typography } from "@mui/material";
+import { Box, Button, Divider, Icon, IconButton, List, ListItem, ListItemAvatar, ListItemText, Paper, TextField, Typography } from "@mui/material";
 import { ActionFunctionArgs, LoaderFunctionArgs, json } from "@remix-run/node";
 import { useFetcher, useLoaderData, useNavigate, useParams } from "@remix-run/react";
 import invariant from "tiny-invariant";
 import { db } from "~/utils/db.serves";
 import { Unstable_Grid2 as Grid } from "@mui/material"
-import { Delete } from "@mui/icons-material";
-import { Brand, Item, ProductModel } from "@prisma/client";
+import { Delete, ShoppingBag, ShoppingBasketOutlined } from "@mui/icons-material";
+import { Brand, Item, Order, ProductModel } from "@prisma/client";
+import { getOrderId } from "~/utils/session";
 
-export const loader = async ({ params }: LoaderFunctionArgs) => {
-    invariant(params.orderId, "Missing id order");
-    const order = await db.order.findUnique({
-        where: {
-            id: +params.orderId
-        },
-        include: {
-            usr: true,
-            items: {
-                include: {
-                    productModel: {
-                        include: {
-                            brend: true,
+export const loader = async ({ request }: LoaderFunctionArgs) => {
+    const orderId = await getOrderId(request);
+    let order: Order | null = null;
+    if (orderId) {
+        order = await db.order.findUnique({
+            where: {
+                id: +orderId
+            },
+            include: {
+                usr: true,
+                items: {
+                    include: {
+                        productModel: {
+                            include: {
+                                brend: true,
+                            }
                         }
                     }
                 }
             }
-        }
-    });
+        });
+    }
     return json({ order });
 }
-export const action = async ({ params, request }: ActionFunctionArgs) => {
-    invariant(params.id, "Missing id order");
+export const action = async ({ request }: ActionFunctionArgs) => {
+    const orderId = await getOrderId(request);
+    invariant(orderId, "Order id is missing");
+    //
     const formData = await request.formData();
     const data = Object.fromEntries(formData);
     console.log(data);
@@ -39,7 +45,7 @@ export const action = async ({ params, request }: ActionFunctionArgs) => {
         invariant(itemIdDelete, "Missing id item to delete from order");
         const order = await db.order.findUnique({
             where: {
-                id: +params.id,
+                id: +orderId,
             },
             include: {
                 items: true,
@@ -68,6 +74,7 @@ export const action = async ({ params, request }: ActionFunctionArgs) => {
 export default function OrderPage() {
     const { order } = useLoaderData<typeof loader>();
     const fetcher = useFetcher();
+    const nav = useNavigate();
     return (
         <Grid container spacing={2}>
             <Grid xs={12}
@@ -77,18 +84,34 @@ export default function OrderPage() {
                 <fetcher.Form method="post">
                     <Paper sx={{
                         minHeight: "400px",
-                        width:"100%"
+                        width: "100%"
                     }}>
                         {
                             order?.items.length > 0 ?
-                                <OrderItemsView items={order?.items} />
-                                : <Typography
-                                    justifySelf="center"
-                                    alignSelf="center"
-                                    m="0 auto"
-                                >
-                                    Корзина пуста
-                                </Typography>
+                                <OrderItemsView items={order?.items} orderId={order?.id} />
+                                : <Box
+                                    sx={{
+                                        display: "flex",
+                                        flexDirection: "column",
+                                        width: "max-content",
+                                        margin:"0 auto",
+                                        justifyContent:"center",
+                                        alignItems:"center",
+                                        height: 400,
+                                    }}>
+                                    <Typography variant="h6" >
+                                        В корзине ничего нет
+                                    </Typography>
+                                    <Button variant="outlined"
+                                        sx={{
+                                            width: "max-content",
+                                        }}
+                                        endIcon={<ShoppingBag />}
+                                        onClick={()=>nav("/main")}
+                                    >
+                                        За покупками
+                                    </Button>
+                                </Box>
                         }
                     </Paper>
                 </fetcher.Form>
@@ -97,11 +120,11 @@ export default function OrderPage() {
     )
 }
 
-function OrderItemsView({ items }: {
+function OrderItemsView({ orderId, items }: {
+    orderId: number,
     items: Array<Item & { productModel: ProductModel & { brend: Brand } }>
 }) {
     const nav = useNavigate();
-    const param = useParams();
     const handlerDelete = (idItem: string) => {
         const element = document.getElementById("delete-item-id") as HTMLInputElement;
         if (element) {
@@ -115,14 +138,14 @@ function OrderItemsView({ items }: {
     return (
         <Box
             sx={{
-                paddingInline:1,
-                display:"flex",
-                flexDirection:"column"
+                paddingInline: 1,
+                display: "flex",
+                flexDirection: "column"
             }}
         >
             <List sx={{
-                width:"100%",
-                justifySelf:"center",
+                width: "100%",
+                justifySelf: "center",
             }
             }>
                 {
@@ -156,7 +179,7 @@ function OrderItemsView({ items }: {
                                 }}>
                                     <Typography sx={{
                                         justifySelf: "start",
-                                        flex:"1"
+                                        flex: "1"
                                     }}>
                                         {` ${item.productModel?.brend?.brandName} ${item.productModel?.name} US ${item.size}`}
                                     </Typography>
@@ -189,7 +212,7 @@ function OrderItemsView({ items }: {
                 marginBlock: 2
             }}
                 variant="contained"
-                onClick={()=>{nav("/main/confirm/order/"+param.id)}}
+                onClick={() => { nav("/main/confirm/order/" + orderId) }}
             >
                 Оформить заказ
             </Button>

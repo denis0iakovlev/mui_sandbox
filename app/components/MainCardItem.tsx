@@ -4,30 +4,39 @@ import { Brand, Item, ProductModel, Surface } from "@prisma/client";
 import { useFetcher } from "@remix-run/react";
 import { useState } from "react";
 
-export default function InfoMain({ product }: {
+export default function MainCardItem({ product }: {
     product: ProductModel &
     { brend: Brand, surface: Surface, modelItems: Item[] }
 }) {
     const [selectedItem, SetSelectedItem] = useState<boolean[]>(Array(product.modelItems.length));
+    const [addBtnEnable, SetAddBtnEnable] = useState<boolean>(false);
     const fetcher = useFetcher();
     const theme = useTheme();
     const handlerClickSize = (inx: number) => {
-        const copy  = selectedItem.slice();
+        const copy = selectedItem.slice();
         copy[inx] = !copy[inx];
         SetSelectedItem(copy);
-        //
+        //Set enable btn
+        let oneIsSel = false;
+        for (let selItem of copy) {
+            if (selItem) {
+                oneIsSel = true;
+                break;
+            }
+        }
+        SetAddBtnEnable(oneIsSel);
         const element = document.getElementById("item-id-list") as HTMLInputElement;
         if (element) {
             const val = [];
-            for(let i =0; i < copy.length; i++){
-                if(copy[i]){
+            for (let i = 0; i < copy.length; i++) {
+                if (copy[i]) {
                     val.push(product.modelItems[i].id);
                 }
             }
             element.value = val.join();
             console.log(element.value);
-        }else{
-            console.log("element fot id isniot found");
+        } else {
+            console.log("element for id isniot found");
         }
     }
     return (
@@ -114,8 +123,9 @@ export default function InfoMain({ product }: {
                     </Box>
                     <Button variant="contained"
                         color="secondary"
-                        disabled={selectedItem === null} sx={{
-                            width: "80%",
+                        disabled={!addBtnEnable}
+                        sx={{
+                            width: "max-content",
                             marginBlock: 2,
                             alignSelf: "center"
                         }}

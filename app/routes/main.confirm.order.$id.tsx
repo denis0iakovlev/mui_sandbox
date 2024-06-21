@@ -1,16 +1,14 @@
 import { Label } from "@mui/icons-material";
-import { Alert, Box, Button, FormControl, Input, InputLabel, InputProps, Paper, TextField, TextFieldProps, Typography, styled, useTheme } from "@mui/material";
+import { Alert, Box, Button, Paper, TextField, TextFieldProps, Typography } from "@mui/material";
 import { Unstable_Grid2 as Grid } from "@mui/material"
 import { Adress } from "@prisma/client";
 import { ActionFunctionArgs, LoaderFunctionArgs, json, redirect } from "@remix-run/node";
 import { Form, useActionData, useLoaderData } from "@remix-run/react";
-import { pattern } from "isbot";
-import { error } from "node:console";
 import React, { ChangeEvent, useState } from "react";
 import { IMaskInput } from "react-imask";
 import invariant from "tiny-invariant";
 import { db } from "~/utils/db.serves";
-import { getUserId } from "~/utils/session";
+import { destroyOrderCookie, getUserId } from "~/utils/session";
 
 type AdressData = Omit<Adress, "id" | "userId">
 type AdressError = Partial<AdressData>
@@ -120,7 +118,8 @@ export const action = async ({ params, request }: ActionFunctionArgs) => {
                 }
             }
         });
-        return redirect("/main/confirm/sucess/order/"+order.id);
+
+        return await destroyOrderCookie(request, "/main/confirm/sucess/order/"+order.id);
     }
     return json({ error });
 }
@@ -170,7 +169,6 @@ function AdressPart({ adress , error}: { adress: Adress | null, error: Opt<Adres
         phoneNumber: '',
         zipCode: ''
     });
-    const theme = useTheme();
     const handlerChange = (event: ChangeEvent<HTMLInputElement>) => {
         SetValue({
             ...value,

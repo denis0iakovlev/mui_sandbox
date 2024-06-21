@@ -3,15 +3,12 @@ import { Box, IconButton, Paper, } from "@mui/material";
 import { Unstable_Grid2 as Grid } from "@mui/material"
 import { ActionFunctionArgs, LoaderFunctionArgs, json } from "@remix-run/node";
 import { useLoaderData } from "@remix-run/react";
-import React, { useState } from "react";
 import invariant from "tiny-invariant";
 import { db } from "~/utils/db.serves";
 import noImage from "public/assets/no_image.jpg";
 import ImageViewMain from "~/components/ImageViewMain";
-import InfoMain from "~/components/InfoMain";
-import { request } from "http";
-import { getOrderId, setCookie } from "~/utils/session";
-import { User, Order } from "@prisma/client";
+import MainCardItem from "~/components/MainCardItem";
+import { getOrderId, setOrderIdCookie } from "~/utils/session";
 
 export const loader = async ({ params }: LoaderFunctionArgs) => {
     invariant(params.id, "id is wrong");
@@ -35,7 +32,7 @@ export const action = async ({ params, request }: ActionFunctionArgs) => {
 
     let orderIsCreated = false;
     let order = null;
-    if (orderId === null) {
+    if (orderId === null || typeof orderId === 'undefined') {
         orderIsCreated = true;
         order = await db.order.create({
             data: {
@@ -78,7 +75,7 @@ export const action = async ({ params, request }: ActionFunctionArgs) => {
         })
     }
     if(orderIsCreated){
-        return await setCookie(order.id.toString(),"/main/"+params.id );
+        return await setOrderIdCookie({ key: order.id.toString(), redirectTo: "/main/" + params.id });
     }
     return json({order});
 }
@@ -98,7 +95,7 @@ export default function MainPage() {
             {/** description block */}
             <Grid xs={12} sm={10} smOffset={1}
                 xl={2} sx={{ height: "400px" }}>
-                <InfoMain product={productModel} />
+                <MainCardItem product={productModel} />
             </Grid>
         </Grid>
     )

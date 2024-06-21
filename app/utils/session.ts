@@ -25,7 +25,7 @@ export async function getOrderId(reques: Request) {
     return session.get(KEY_COOKIE);
 }
 
-export async function setCookie(key: string, redirectTo: string) {
+export async function setOrderIdCookie({ key, redirectTo }: { key: string; redirectTo: string; }) {
     const session = await getSession();
     session.set(KEY_COOKIE, key);
     return redirect(redirectTo, {
@@ -35,12 +35,21 @@ export async function setCookie(key: string, redirectTo: string) {
         }
     })
 }
+export async function destroyOrderCookie(request:Request, redirectTo:string){
+    const session = await getSession(request.headers.get("Cookie"));
+    return redirect(redirectTo, {
+        status:302,
+        headers:{
+            "Set-Cookie":await destroySession(session),
+        }
+    });
+}
 /* For user id cookie */
 const userIdSession = createCookieSessionStorage<userData>({
     cookie: {
         name: "user_id",
         path: "/",
-        maxAge: 60 * 60 * 24 ,
+        maxAge: 60 * 60 * 24 ,//one day
         sameSite: "lax",
         httpOnly: true,
     }
