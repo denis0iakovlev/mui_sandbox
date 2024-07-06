@@ -46,10 +46,6 @@ function CheckError(formData: Opt): Partial<Opt>{
     return error;
 }
 
-function ExtractAdressData(formData:Opt ){
-    
-}
-
 export const loader = async ({ params, request }: LoaderFunctionArgs) => {
     invariant(params.id, "Missing order id");
     const order = await db.order.findUnique({
@@ -89,6 +85,7 @@ export const loader = async ({ params, request }: LoaderFunctionArgs) => {
     }
     return json({ order });
 }
+
 export const action = async ({ params, request }: ActionFunctionArgs) => {
     invariant(params.id, "Wrong id order");
     const formData = await request.formData();
@@ -97,6 +94,9 @@ export const action = async ({ params, request }: ActionFunctionArgs) => {
     console.log(data);
     console.log(data.zipCode);
     const error = CheckError(data);
+    //
+    const userId = await getUserId(request);
+    invariant(userId, "User id missing. Hi programmer!!!");
     if(Object.entries(error).length == 0){
         //create in order new adress
         console.log("create into order new adress");
@@ -106,6 +106,11 @@ export const action = async ({ params, request }: ActionFunctionArgs) => {
             },
             data:{
                 status:"IN_PROCESS",
+                usr:{
+                    connect:{
+                        id:+userId
+                    }
+                },
                 adress:{
                     create:{
                         city:data.city,
@@ -115,7 +120,7 @@ export const action = async ({ params, request }: ActionFunctionArgs) => {
                         firstName:data.firstName,
                         lastName:data.lastName
                     }
-                }
+                },
             }
         });
 
@@ -130,6 +135,7 @@ interface CustomProps {
     mask: string;
     pattern: string;
 }
+
 const TextMaskCustom = React.forwardRef<HTMLInputElement, CustomProps>(
     function TextMaskCustom(props, ref) {
         const { onChange, ...other } = props;

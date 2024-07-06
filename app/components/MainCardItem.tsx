@@ -5,8 +5,9 @@ import { useFetcher } from "@remix-run/react";
 import { useState } from "react";
 
 export default function MainCardItem({ product }: {
-    product: ProductModel &
-    { brend: Brand, surface: Surface, modelItems: Item[] }
+   /* product: ProductModel &
+    { brend: Brand, surface: Surface, modelItems: Item[] }*/
+     product:any
 }) {
     const [selectedItem, SetSelectedItem] = useState<boolean[]>(Array(product.modelItems.length));
     const [addBtnEnable, SetAddBtnEnable] = useState<boolean>(false);

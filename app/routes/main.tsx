@@ -66,7 +66,9 @@ export default function MainPage() {
         }}>
           <IconButton sx={{
             display: "block"
-          }}>
+          }}
+            onClick={() => nav("user")}
+          >
             <Person />
           </IconButton>
           <MyIcon color="info"

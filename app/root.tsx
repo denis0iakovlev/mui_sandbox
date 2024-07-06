@@ -1,4 +1,4 @@
-import { ThemeProvider, createTheme } from "@mui/material";
+import { Box, ThemeProvider, createTheme } from "@mui/material";
 import { cssBundleHref } from "@remix-run/css-bundle";
 import type { LinksFunction } from "@remix-run/node";
 import {
@@ -8,7 +8,9 @@ import {
   Outlet,
   Scripts,
   ScrollRestoration,
+  useRouteError,
 } from "@remix-run/react";
+import { errorMonitor } from "events";
 import styles from "~/styles/styles.css"
 
 export const links: LinksFunction = () => [
@@ -31,6 +33,30 @@ const theme = createTheme({
     }
   }
 });
+export function ErrorBoundary() {
+  const error = useRouteError();
+  console.error(error);
+  return (
+    <html>
+      <head>
+        <title>Oh no!</title>
+        <Meta />
+        <Links />
+      </head>
+      <body>
+        {/* add the UI you want your users to see */}
+        <Box>
+          {
+            error instanceof Error ?
+            error.message 
+            :"Что то пошло не так"
+          }
+        </Box>
+        <Scripts />
+      </body>
+    </html>
+  );
+}
 export default function App() {
   return (
     <html lang="en">

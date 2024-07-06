@@ -22,6 +22,7 @@ export const loader = async ({ params }: LoaderFunctionArgs) => {
             surface: true,
         }
     });
+    invariant(productModel, "Not find product model entity");
     //
     return json({ productModel });
 }
@@ -38,8 +39,8 @@ export const action = async ({ params, request }: ActionFunctionArgs) => {
             data: {
                 status: "OPEN",
                 openedData: new Date(),
-            }, include:{
-                items:true,
+            }, include: {
+                items: true,
             }
         });
         invariant(order, "New order wasnt created" + orderId)
@@ -47,37 +48,37 @@ export const action = async ({ params, request }: ActionFunctionArgs) => {
         order = await db.order.findUnique({
             where: {
                 id: +orderId
-            }, include:{
-                items:true,
+            }, include: {
+                items: true,
             }
         });
         invariant(order, "Not fount order with id " + orderId)
     }
     const form = await request.formData();
     //
-    const inputVal =  form.get("items_id_list") as string;
-    if (typeof inputVal === "string"){
+    const inputVal = form.get("items_id_list") as string;
+    if (typeof inputVal === "string") {
 
         const itemList = inputVal.split(',');
-        let itemIdList:number[] = Array.from(itemList, (item) => (+item));
+        let itemIdList: number[] = Array.from(itemList, (item) => (+item));
         let oldItemListId = Array.from(order.items, (item) => (item.id));
         const fullNewList = oldItemListId.concat(itemIdList);
-        let connectItems :{id:number}[] =  fullNewList.map((id)=> ({id:id}));
-        
+        let connectItems: { id: number }[] = fullNewList.map((id) => ({ id: id }));
+
         order = await db.order.update({
-            where:{
-                id:order.id,
-            }, data:{
-                items:{
-                    set:connectItems
+            where: {
+                id: order.id,
+            }, data: {
+                items: {
+                    set: connectItems
                 }
             }
         })
     }
-    if(orderIsCreated){
+    if (orderIsCreated) {
         return await setOrderIdCookie({ key: order.id.toString(), redirectTo: "/main/" + params.id });
     }
-    return json({order});
+    return json({ order });
 }
 
 export default function MainPage() {

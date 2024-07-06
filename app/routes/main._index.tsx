@@ -32,7 +32,7 @@ export default function Index() {
         {
           products.map((product) => (
             <Grid xs={6} sm={6} md={4} lg={3} xl={2} >
-              <GridItem elevation={12}>
+              <GridItem elevation={12} key={product.id}>
                 <SmallCard model={product} />
               </GridItem>
             </Grid>

@@ -1,5 +1,7 @@
+import { Box } from "@mui/material";
 import { User } from "@prisma/client";
 import { LoaderFunctionArgs } from "@remix-run/node";
+import { Links, Meta, Scripts, useRouteError } from "@remix-run/react";
 import invariant from "tiny-invariant";
 import { db } from "~/utils/db.serves";
 import { getUser } from "~/utils/db.user";
@@ -12,11 +14,10 @@ interface TgUserData {
     auth_date: number,
     hash: string
 }
-
 function GetTgDataFromReq(request: Request) {
     const url = new URL(request.url);
     type TgUserDataL = keyof TgUserData;
-    let tgData: TgUserData = { auth_date: 0, first_name: "", hash: "", id: 0, username: "" };
+    let tgData: Partial< TgUserData> = {};
     url.searchParams.forEach((val, key, parent) => {
         //try to literal
         const keyL = key as TgUserDataL;
@@ -42,6 +43,7 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
 
     const tgData = GetTgDataFromReq(request);
     //
+    invariant(tgData.id, "Telegram data is wrong!!!");
     const user = await db.user.upsert({
         where:{
             id:tgData.id

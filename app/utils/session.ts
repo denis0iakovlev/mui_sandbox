@@ -73,3 +73,13 @@ export async function login(userId:string, redirectTo:string) {
         }
     });
 }
+
+export async function logout(request:Request, redirectTo:string){
+    const session = await userIdSession.getSession(request.headers.get("Cookie"));
+    return redirect(redirectTo, {
+        status:302,
+        headers:{
+            "Set-Cookie":await userIdSession.destroySession(session),
+        }
+    });
+}
